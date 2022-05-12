@@ -7,16 +7,13 @@ const ws = wb.addWorksheet('Fatura FACS');
 // Available foders at current directory
 
 const folders = [
-    "Clivet Energia",
-    "CPB Torre Norte",
-    "CPB Torre Sul",
-    "CTN",
-    "Mouraria",
-    "STM - 1568432"
+    "folder1",
+    "folder2",
+    "folder3",
 ];
 
 // preparing data destiny
-let faturas = [];
+let pdfList = [];
 
 // preparing erro handler
 let logErro = []
@@ -42,7 +39,7 @@ async function extract () {
             pdfParser.loadPDF(`${folders[i]}/${file}`);
     
             // parse folder
-            let fatura = await new Promise(async (resolve, reject) => {
+            let pdfFile = await new Promise(async (resolve, reject) => {
                 // on data ready
                 pdfParser.on("pdfParser_dataReady", (pdfData) => {
                     // the raw data in text format
@@ -54,16 +51,7 @@ async function extract () {
                         
                         resolve({
                         arquivo:`Pasta: ${folders[i]}, arquivo: ${file}`,
-                        medidor:/N° medidor -(.*?)Ciclo -/i.exec(raw)[1].trim(),
-                        leitura:/Ciclo -(.*?)Dias/i.exec(raw)[1].trim(),
-                        usoNaPonta: /Uso do Sistema Encargo Na Ponta(.*?)Uso/i.exec(raw)[1].trim(),
-                        usoForaPonta: /Uso Sistema Encargo Fora de Ponta(.*?)Consumo/i.exec(raw)[1].trim(),
-                        dataVencimento: /DATA DE VENCIMENTO(.*?)TOTAL/i.exec(raw)[1].trim()
-        
-                        
-                        // // Uso do Sistema Encargo Na Ponta(kWh)" 2.276,8200000 0,43674866 994,39                 
-                        // // Uso Sistema Encargo Fora de Ponta(kWh) 15.258,0000000 0,05527786 843,42 
-                        // // Consumo Reativo Exc. Na Ponta(kVARh) 
+                        data:/regex syntax/i.exec(raw)[1].trim(),
                         })
 
                         console.log(`sucesso extração ${file} em ${folders[i]}`)
@@ -77,19 +65,15 @@ async function extract () {
                     
                 })
             })
-            faturas.push(fatura)
+            pdfList.push(pdfFile)
         }))
-        // fs.writeFileSync('faturas.json', JSON.stringify(faturas))
-        // console.table(faturas)
+        // fs.writeFileSync('pdfFile.json', JSON.stringify(pdfList))
+        // console.table(pdfList)
     }
         
         const headingColumnNames = [
             "Arquivo",
-            "Medidor",
-            "Leitura",
-            "usoNaPonta",
-            "usoForaPonta",
-            "dataVencimento"    
+            "data",
         ]
         let headingColumnIndex = 1;
         let rowIndex = 2;
@@ -100,10 +84,10 @@ async function extract () {
                 .string(heading)
         });
         
-        faturas.push(logErro)
+        pdfList.push(logErro)
 
         //Write Data in Excel file
-        faturas.forEach( record => {
+        pdfList.forEach( record => {
             let columnIndex = 1;
             Object.keys(record ).forEach(columnName =>{
                 ws.cell(rowIndex,columnIndex++)
@@ -115,7 +99,7 @@ async function extract () {
         fs.writeFile("log erro leitura.json",JSON.stringify(logErro),function(err,logErro){
             return JSON.stringify(logErro)
         });
-        console.log('pasta do excel criada com sucesso!')
+        console.log('Excel file sucessfully created!')
         console.log(`são ${logErro.length} erros de leitura de pdf`)
 
 }
@@ -123,8 +107,9 @@ async function extract () {
 extract()
 
 
-
-// const files = "./24171.pdf"
+// TESTING OTHER LIBERIES AND FRAMEWORKS:
+// ==========================================================================
+// const files = "./file.pdf"
 
 // const pdf2excel = require('pdf-to-excel');
 
@@ -138,7 +123,7 @@ extract()
 //     end: 1,
 //   }
 
-//   pdf2excel.genXlsx(files, 'fatura.xlsx', options);
+//   pdf2excel.genXlsx(files, 'file.xlsx', options);
 // } catch (err) {
 //   console.error(err);
 // }
@@ -154,10 +139,10 @@ extract()
 //     JSON.stringify(logErro);
 // });
 
-// pdfParser.loadPDF("./24171.pdf");
+// pdfParser.loadPDF("./file.pdf");
 
 
-// // const faturas = []
+// // const file = []
 // pdfParser = new PDFParser();
 // pdfParser.loadPDF(files);
 // pdfParser.on("pdfParser_dataReady", (logErro) => {
@@ -172,6 +157,8 @@ extract()
 // //     }))
 // })();
 
+// TESTING OTHER FRAMEWORK LIBRERY
+// ===================================================
 // 'use strict';
 
 // const path = require('path');
